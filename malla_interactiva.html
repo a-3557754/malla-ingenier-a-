@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Interactiva - Informática</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .course {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+      transition: 0.3s;
+    }
+    .course.locked {
+      opacity: 0.5;
+    }
+    .course h3 {
+      margin: 0 0 0.5rem 0;
+    }
+    .checkbox {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+    .approved {
+      background: #d4edda;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva Ingeniería Informática</h1>
+  <div class="grid" id="courses"></div>
+  <script>
+    const malla = [
+      { sigla: "MAT060", nombre: "ÁLGEBRA Y GEOMETRÍA", semestre: 1, prerequisitos: [] },
+      { sigla: "HXW006", nombre: "COMUNICACIÓN EFECTIVA I", semestre: 1, prerequisitos: [] },
+      { sigla: "EFI200", nombre: "EDUCACIÓN FÍSICA I", semestre: 1, prerequisitos: [] },
+      { sigla: "FIS100", nombre: "INTRODUCCIÓN A LA FÍSICA", semestre: 1, prerequisitos: [] },
+      { sigla: "INF129", nombre: "INTRODUCCIÓN A LA PROGRAMACIÓN", semestre: 1, prerequisitos: [] },
+      { sigla: "MAT070", nombre: "INTRODUCCIÓN AL CÁLCULO", semestre: 1, prerequisitos: [] },
+      { sigla: "MAT061", nombre: "ÁLGEBRA LINEAL", semestre: 2, prerequisitos: ["MAT060"] },
+      { sigla: "MAT071", nombre: "CÁLCULO EN UNA VARIABLE", semestre: 2, prerequisitos: ["MAT070"] },
+      { sigla: "HXW007", nombre: "COMUNICACIÓN EFECTIVA II", semestre: 2, prerequisitos: ["HXW006"] },
+      { sigla: "EFI201", nombre: "EDUCACIÓN FÍSICA II", semestre: 2, prerequisitos: ["EFI200"] },
+      { sigla: "FIS111", nombre: "FÍSICA GENERAL MECÁNICA", semestre: 2, prerequisitos: ["FIS100"] },
+      { sigla: "IWG400", nombre: "PROYECTO INICIAL", semestre: 2, prerequisitos: [] },
+      { sigla: "AUX200", nombre: "ADMINISTRACIÓN Y SOSTENIBILIDAD", semestre: 3, prerequisitos: [] },
+      { sigla: "HXW008", nombre: "ANÁLISIS CRÍTICO DE TEXTO", semestre: 3, prerequisitos: ["HXW007"] },
+      { sigla: "MAT081", nombre: "CÁLCULO EN VARIAS VARIABLES", semestre: 3, prerequisitos: ["MAT071"] },
+      { sigla: "FIS112", nombre: "CALOR Y ONDAS", semestre: 3, prerequisitos: ["FIS111"] },
+      { sigla: "INF132", nombre: "MATEMÁTICA DISCRETA", semestre: 3, prerequisitos: ["INF129", "MAT070", "MAT061"] },
+      { sigla: "INF131", nombre: "PROGRAMACIÓN AVANZADA", semestre: 3, prerequisitos: ["INF129"] },
+      { sigla: "HXW009", nombre: "COMUNICACIÓN EFECTIVA III", semestre: 4, prerequisitos: ["HXW007"] },
+      { sigla: "MAT053", nombre: "ECUACIONES DIFERENCIALES", semestre: 4, prerequisitos: ["MAT081"] },
+      { sigla: "FIS114", nombre: "ELECTRICIDAD Y MAGNETISMO", semestre: 4, prerequisitos: ["FIS112"] },
+      { sigla: "INF135", nombre: "ESTADÍSTICA COMPUTACIONAL", semestre: 4, prerequisitos: ["MAT081", "INF129"] },
+      { sigla: "INF133", nombre: "ESTRUCTURA DE DATOS", semestre: 4, prerequisitos: ["INF131"] },
+      { sigla: "AUX201", nombre: "INGENIERÍA ECONÓMICA", semestre: 4, prerequisitos: ["INF129"] },
+      { sigla: "INF140", nombre: "ARQUITECTURA DE COMPUTADORES", semestre: 5, prerequisitos: ["INF133"] },
+      { sigla: "INF138", nombre: "BASES DE DATOS", semestre: 5, prerequisitos: ["INF133"] },
+      { sigla: "INF142", nombre: "INGENIERÍA Y SOCIEDAD", semestre: 5, prerequisitos: ["IWG400"] },
+      { sigla: "INF229", nombre: "OPTIMIZACIÓN", semestre: 5, prerequisitos: ["INF129", "MAT061"] },
+      { sigla: "INF141", nombre: "PARADIGMAS DE PROGRAMACIÓN", semestre: 5, prerequisitos: ["INF133"] },
+      { sigla: "INF143", nombre: "AUTÓMATAS Y LENGUAJES FORMALES", semestre: 5, prerequisitos: ["INF132"] },
+      { sigla: "INF144", nombre: "ALGORITMOS Y COMPLEJIDAD", semestre: 6, prerequisitos: ["INF133"] },
+      { sigla: "INF146", nombre: "ANÁLISIS Y DISEÑO DE SOFTWARE", semestre: 6, prerequisitos: ["INF141", "INF138"] },
+      { sigla: "INF147", nombre: "COMPUTACIÓN CIENTÍFICA", semestre: 6, prerequisitos: ["MAT053", "INF133"] },
+      { sigla: "HXW012", nombre: "COMUNICACIÓN EFECTIVA IV", semestre: 6, prerequisitos: ["HXW009"] },
+      { sigla: "INF148", nombre: "INVESTIGACIÓN DE OPERACIONES", semestre: 6, prerequisitos: ["INF135", "INF229"] },
+      { sigla: "INF145", nombre: "SISTEMAS OPERATIVOS", semestre: 6, prerequisitos: ["INF140"] },
+      { sigla: "INF158", nombre: "CIENCIA DE DATOS", semestre: 7, prerequisitos: ["INF133", "INF146"] },
+      { sigla: "INF156", nombre: "INGENIERÍA DE SOFTWARE", semestre: 7, prerequisitos: ["INF146"] },
+      { sigla: "AUX", nombre: "INGLÉS DISCIPLINAR", semestre: 7, prerequisitos: ["HXW012"] },
+      { sigla: "INF157", nombre: "INTELIGENCIA ARTIFICIAL I", semestre: 7, prerequisitos: ["INF147"] },
+      { sigla: "INF154", nombre: "REDES Y CIBERSEGURIDAD", semestre: 7, prerequisitos: ["INF140"] },
+      { sigla: "INF153", nombre: "TEORÍA DE SISTEMAS", semestre: 7, prerequisitos: ["MAT053", "INF143"] },
+      { sigla: "INF165", nombre: "DISEÑO UX", semestre: 8, prerequisitos: ["INF146"] },
+      { sigla: "AUX219", nombre: "ELECTIVO", semestre: 8, prerequisitos: [] },
+      { sigla: "INF166", nombre: "INTELIGENCIA ARTIFICIAL II", semestre: 8, prerequisitos: ["INF157", "INF158"] },
+      { sigla: "INF163", nombre: "PROYECTO DE INGENIERÍA", semestre: 8, prerequisitos: ["INF147", "INF144"] },
+      { sigla: "INF164", nombre: "SISTEMAS DISTRIBUIDOS", semestre: 8, prerequisitos: ["INF145", "INF154"] },
+      { sigla: "INF167", nombre: "SISTEMAS ORGANIZACIONALES", semestre: 8, prerequisitos: ["INF142"] },
+      { sigla: "AUX222", nombre: "ELECTIVO", semestre: 9, prerequisitos: [] },
+      { sigla: "INF170", nombre: "ELECTIVO DISCIPLINAR 1", semestre: 9, prerequisitos: [] },
+      { sigla: "INF169", nombre: "ELECTIVO DISCIPLINAR 2", semestre: 9, prerequisitos: [] },
+      { sigla: "INF171", nombre: "ELECTIVO DISCIPLINAR 3", semestre: 9, prerequisitos: [] },
+      { sigla: "INF168", nombre: "GESTIÓN PROYECTOS INF.", semestre: 9, prerequisitos: [] },
+      { sigla: "INF540", nombre: "ELECTIVO DISCIPLINAR 4", semestre: 10, prerequisitos: [] },
+      { sigla: "INF541", nombre: "ELECTIVO DISCIPLINAR 5", semestre: 10, prerequisitos: [] },
+      { sigla: "INF539", nombre: "TALLER DE TITULACIÓN", semestre: 10, prerequisitos: ["INF164", "INF166"] },
+      { sigla: "INF538", nombre: "TALLER PROYECTOS INFORMÁTICA", semestre: 10, prerequisitos: ["INF168", "INF539"] }
+    ];
+
+    const container = document.getElementById("courses");
+
+    function loadEstado() {
+      return JSON.parse(localStorage.getItem("estadoMalla") || '{}');
+    }
+
+    function saveEstado(estado) {
+      localStorage.setItem("estadoMalla", JSON.stringify(estado));
+    }
+
+    function render() {
+      const estado = loadEstado();
+      container.innerHTML = "";
+      malla.forEach(ramo => {
+        const aprobado = estado[ramo.sigla];
+        const prereqsCumplidos = ramo.prerequisitos.every(pr => estado[pr]);
+
+        const div = document.createElement("div");
+        div.className = "course";
+        if (!prereqsCumplidos) div.classList.add("locked");
+        if (aprobado) div.classList.add("approved");
+
+        div.innerHTML = `
+          <h3>${ramo.sigla} - ${ramo.nombre}</h3>
+          <p>Semestre: ${ramo.semestre}</p>
+          <p>Prerrequisitos: ${ramo.prerequisitos.length ? ramo.prerequisitos.join(", ") : "Ninguno"}</p>
+          <input type="checkbox" class="checkbox" ${aprobado ? "checked" : ""}>
+        `;
+
+        div.querySelector(".checkbox").addEventListener("change", e => {
+          estado[ramo.sigla] = e.target.checked;
+          saveEstado(estado);
+          render();
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
